@@ -15,6 +15,7 @@ const EntryCard = ({
   entry,
   inferedFields,
   publicFolder,
+  publicFolderRelative,
   collectionLabel,
   viewStyle = VIEW_STYLE_LIST,
 }) => {
@@ -22,7 +23,7 @@ const EntryCard = ({
   const title = label || entry.getIn(['data', inferedFields.titleField]);
   const path = `/collections/${collection.get('name')}/entries/${entry.get('slug')}`;
   let image = entry.getIn(['data', inferedFields.imageField]);
-  image = resolvePath(image, publicFolder);
+  image = resolvePath(image, publicFolder, publicFolderRelative);
   if(image) {
     image = encodeURI(image);
   }
