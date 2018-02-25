@@ -7,15 +7,16 @@ export function resolvePath(path, basePath, allowRelative) { // eslint-disable-l
 
   // It's an absolute path.
   if (absolutePath.test(path)) return path;
-  if (allowRelative) return path;
+
+  let pathPrefix = allowRelative ? '' : '/';
 
   if (path.indexOf('/') === -1) {
     // It's a single file name, no directories. Prepend public folder
-    return normalizePath(`/${ basePath }/${ path }`);
+    return normalizePath(`${pathPrefix}${ basePath }/${ path }`);
   }
 
   // It's a relative path. Prepend a forward slash.
-  return normalizePath(`/${ path }`);
+  return normalizePath(`${pathPrefix}${ path }`);
 }
 
 /**
