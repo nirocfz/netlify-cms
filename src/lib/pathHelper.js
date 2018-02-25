@@ -1,12 +1,13 @@
 const absolutePath = new RegExp('^(?:[a-z]+:)?//', 'i');
 const normalizePath = path => path.replace(/[\\\/]+/g, '/');
 
-export function resolvePath(path, basePath) { // eslint-disable-line
+export function resolvePath(path, basePath, allowRelative) { // eslint-disable-line
   // No path provided, skip
   if (!path) return null;
 
   // It's an absolute path.
   if (absolutePath.test(path)) return path;
+  if (allowRelative) return path;
 
   if (path.indexOf('/') === -1) {
     // It's a single file name, no directories. Prepend public folder
