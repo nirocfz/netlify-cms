@@ -7,6 +7,7 @@ export function resolvePath(path, basePath, allowRelative) { // eslint-disable-l
 
   // It's an absolute path.
   if (absolutePath.test(path)) return path;
+  if (allowRelative) return path;
 
   let pathPrefix = allowRelative ? '' : '/';
 
