@@ -18,7 +18,7 @@ const medias = (state = Map(), action) => {
 export default medias;
 
 const memoizedProxies = {};
-export const getAsset = (publicFolder, state, path) => {
+export const getAsset = (publicFolder, builtFolder, state, path) => {
   // No path provided, skip
   if (!path) return null;
 
@@ -29,6 +29,6 @@ export const getAsset = (publicFolder, state, path) => {
   }
 
   // Create a new AssetProxy (for consistency) and return it.
-  proxy = memoizedProxies[path] = new AssetProxy(resolvePath(path, publicFolder), null, true);
+  proxy = memoizedProxies[path] = new AssetProxy(resolvePath(path, builtFolder || publicFolder), null, true);
   return proxy;
 };
