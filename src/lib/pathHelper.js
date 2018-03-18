@@ -10,8 +10,6 @@ export function resolvePath(path, basePath, allowRelative) { // eslint-disable-l
 
   let pathPrefix = allowRelative ? '' : '/';
 
-  let pathPrefix = allowRelative ? '' : '/';
-
   if (path.indexOf('/') === -1) {
     // It's a single file name, no directories. Prepend public folder
     return normalizePath(`${pathPrefix}${ basePath }/${ path }`);
