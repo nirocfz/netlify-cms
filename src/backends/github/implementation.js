@@ -93,7 +93,6 @@ export default class GitHub {
 
   getMedia() {
     return this.api.listFiles(this.config.get('media_folder'))
-      .then(files => files.filter(file => file.type === 'file'))
       .then(files => files.map(({ sha, name, size, download_url, path }) => {
         const url = new URL(download_url);
         if (url.pathname.match(/.svg$/)) {
@@ -137,8 +136,19 @@ export default class GitHub {
       const response = await this.api.persistFiles(null, [mediaFile], options);
       const repo = this.repo || this.getRepoFromResponseUrl(response.url);
       const { value, size, path, fileObj } = mediaFile;
-      const url = `https://raw.githubusercontent.com/${repo}/${this.branch}${path}`;
-      return { id: response.sha, name: value, size: fileObj.size, url, path: trimStart(path, '/') };
+      let url = `https://raw.githubusercontent.com/${repo}/${this.branch}${path}`;
+
+      // Assets uploaded to private repos will need valid access tokens.
+      const isPrivateRepo = await this.api.isPrivateRepo();
+      if (isPrivateRepo) {
+        const files = await this.api.listFiles(this.config.get('media_folder'));
+        const file = files.find(f => (f.sha === mediaFile.sha));
+        if (file) {
+          url = file.download_url;
+        }
+      }
+
+      return { id: mediaFile.sha, name: value, size: fileObj.size, url, path: trimStart(path, '/') };
     }
     catch(error) {
       console.error(error);

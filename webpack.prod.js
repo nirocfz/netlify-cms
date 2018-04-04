@@ -8,7 +8,6 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = merge.smart(require('./webpack.base.js'), {
   entry: {
     cms: './index',
-    init: './init',
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -46,10 +45,15 @@ module.exports = merge.smart(require('./webpack.base.js'), {
     new webpack.SourceMapDevToolPlugin({
       // asset matching
       test: /\.js?$/,
-      exclude: /node_modules/,
 
       // file and reference
       filename: '[file].map',
+
+      // don't include source file content, since we link to the actual file
+      noSources: true,
+
+      // sourcemap is in 'dist', webpack context is in 'src'
+      moduleFilenameTemplate: info => path.posix.normalize(`../src/${info.resourcePath}`),
     }),
   ],
 });

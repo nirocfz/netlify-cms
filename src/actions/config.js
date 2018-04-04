@@ -1,6 +1,6 @@
 import yaml from "js-yaml";
 import { Map, List, fromJS } from "immutable";
-import { trimStart, flow } from "lodash";
+import { trimStart, flow, isBoolean } from "lodash";
 import { authenticateUser } from "Actions/auth";
 import * as publishModes from "Constants/publishModes";
 
@@ -43,6 +43,13 @@ export function validateConfig(config) {
   if (typeof config.get('media_folder') !== 'string') {
     throw new Error("Error in configuration file: Your `media_folder` must be a string. Check your config.yml file.");
   }
+  const slug_encoding = config.getIn(['slug', 'encoding'], "unicode");
+  if (slug_encoding !== "unicode" && slug_encoding !== "ascii") {
+    throw new Error("Error in configuration file: Your `slug.encoding` must be either `unicode` or `ascii`. Check your config.yml file.")
+  }
+  if (!isBoolean(config.getIn(['slug', 'clean_accents'], false))) {
+    throw new Error("Error in configuration file: Your `slug.clean_accents` must be a boolean. Check your config.yml file.");
+  }
   if (!config.get('collections')) {
     throw new Error("Error in configuration file: A `collections` wasn\'t found. Check your config.yml file.");
   }
@@ -66,6 +73,21 @@ function parseConfig(data) {
     });
   }
   return config;
+}
+
+async function getConfig(file, isPreloaded) {
+  const response = await fetch(file, { credentials: 'same-origin' });
+  if (response.status !== 200) {
+    if (isPreloaded) return parseConfig('');
+    throw new Error(`Failed to load config.yml (${ response.status })`);
+  }
+  const contentType = response.headers.get('Content-Type') || 'Not-Found';
+  const isYaml = contentType.indexOf('yaml') !== -1;
+  if (!isYaml) {
+    console.log(`Response for ${ file } was not yaml. (Content-Type: ${ contentType })`);
+    if (isPreloaded) return parseConfig('');
+  }
+  return parseConfig(await response.text());
 }
 
 export function configLoaded(config) {
@@ -108,19 +130,12 @@ export function loadConfig() {
 
     try {
       const preloadedConfig = getState().config;
-      const response = await fetch('config.yml', { credentials: 'same-origin' })
-      const requestSuccess = response.status === 200;
-
-      if (!preloadedConfig && !requestSuccess) {
-        throw new Error(`Failed to load config.yml (${ response.status })`);
-      }
-
-      const loadedConfig = parseConfig(requestSuccess ? await response.text() : '');
+      const loadedConfig = await getConfig('config.yml', preloadedConfig && preloadedConfig.size > 1);
 
       /**
        * Merge any existing configuration so the result can be validated.
        */
-      const mergedConfig = mergePreloadedConfig(preloadedConfig, loadedConfig)
+      const mergedConfig = mergePreloadedConfig(preloadedConfig, loadedConfig);
       const config = flow(validateConfig, applyDefaults)(mergedConfig);
 
       dispatch(configDidLoad(config));

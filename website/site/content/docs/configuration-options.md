@@ -60,6 +60,24 @@ public_folder: "/images/uploads"
 
 Based on the settings above, if a user used an image widget field called `avatar` to upload and select an image called `philosoraptor.png`, the image would be saved to the repository at `/static/images/uploads/philosoraptor.png`, and the `avatar` field for the file would be set to `/images/uploads/philosoraptor.png`.
 
+## Slug Type
+
+The `slug` option allows you to change how filenames for entries are created and sanitized. For modifying the actual data in a slug, see the per-collection option below.
+
+`slug` accepts multiple options:
+
+- `encoding`
+  - `unicode` (default): Sanitize filenames (slugs) according to [RFC3987](https://tools.ietf.org/html/rfc3987) and the [WHATWG URL spec](https://url.spec.whatwg.org/). This spec allows non-ASCII (or non-Latin) characters to exist in URLs.
+  - `ascii`: Sanitize filenames (slugs) according to [RFC3986](https://tools.ietf.org/html/rfc3986). The only allowed characters are (0-9, a-z, A-Z, `_`, `-`, `~`).
+- `clean_accents`: Set to `true` to remove diacritics from slug characters before sanitizing. This is often helpful when using `ascii` encoding.
+
+**Example**
+
+``` yaml
+slug:
+  encoding: "ascii"
+  clean_accents: true
+```
 
 ## Collections
 
@@ -81,6 +99,7 @@ The `collections` setting is the heart of your Netlify CMS configuration, as it 
 - `frontmatter_delimiter`: see detailed description under `format`
 - `slug`: see detailed description below
 - `fields` (required): see detailed description below
+- `editor`: see detailed description below
 
 The last few options require more detailed information.
 
@@ -88,7 +107,7 @@ The last few options require more detailed information.
 
 These settings determine how collection files are parsed and saved. Both are optional—Netlify CMS will attempt to infer your settings based on existing items in the collection. If your collection is empty, or you'd like more control, you can set these fields explicitly.
 
-`extension` determines the file extension searched for when finding existing entries in a folder collection determines the file extension saved for new collection items. It accepts the following values: `yml`, `yaml`, `toml`, `json`, `md`, `markdown`, `html`.
+`extension` determines the file extension searched for when finding existing entries in a folder collection and it determines the file extension used to save new collection items. It accepts the following values: `yml`, `yaml`, `toml`, `json`, `md`, `markdown`, `html`.
 
 You may also specify a custom `extension` not included in the list above, as long as the collection files can be parsed and saved in one of the supported formats below.
 
@@ -150,3 +169,15 @@ fields:
   - {label: "Body", name: "body", widget: "markdown"}
 ```
 
+### `editor`
+
+This setting changes options for the editor view of the collection. It has one option so far:
+
+- `preview`: set to `false` to disable the preview pane for this collection; defaults to `true`
+
+**Example:**
+
+```yaml
+  editor:
+     preview: false
+```
